@@ -63,10 +63,23 @@ def update_hist(num, data):
             neutronData.append(neutronDose)
 
 
+    #get maximum dose for both neutrons and gammas, for use in the histogram range
+    maxn=1;
+    maxg=1;
+    if len(gammaData) !=0:
+        maxg = max(gammaData)
+
+    if len(neutronData) !=0:
+        maxn = max(neutronData)
+        
+    maxTot = max(maxg, maxn, 1)
+      
+            
+
     #plot the histograms
     plt.cla()
-    plt.hist(neutronData,n, alpha=0.5, label='Neutron dose')
-    plt.hist(gammaData  ,n, alpha=0.5, label='$\gamma$ dose');
+    plt.hist(neutronData,n, alpha=0.5, label='Neutron dose', range=([0, maxTot]))
+    plt.hist(gammaData  ,n, alpha=0.5, label='$\gamma$ dose', range=([0, maxTot]));
     plt.xlabel("dose ($\mu$Sv/hr)")
     plt.ylabel("Counts")
     plt.legend(loc='upper right')
