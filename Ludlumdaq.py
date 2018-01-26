@@ -57,9 +57,9 @@ def update_hist(num, data):
         f.write(str(neutronDose)+"\t"+str(gammaDose)+"\n")
 
         #don't add 0 events to plot. They will be saved to file though.
-        if gammaDose != 0:
+        if gammaDose != 0 and gammaDose < 100:
             gammaData.append(gammaDose)
-        if neutronDose != 0:
+        if neutronDose != 0 and neutronDose <100:
             neutronData.append(neutronDose)
 
 
