@@ -5,10 +5,10 @@ import matplotlib.animation as animation
 import serial
 import argparse
 
+#get command line arguments
 parser = argparse.ArgumentParser(description='View a single waveform coming from UART')
 parser.add_argument('-p','--port', help='The port to listen to', default="/dev/ttyUSB0", required=False)
 parser.add_argument('-f','--filename', help='Name of data file', default="ludlum.dat", required=False)
-parser.add_argument('-g','--gamma', help='Plot gamma dose instead of neutron dose', action='store_true', required=False)
 
 args = parser.parse_args()
 
@@ -24,64 +24,58 @@ set_ser.timeout=0.5
 
 set_ser.open()
 
-
+#open the output filename
 f=open(args.filename, 'w')
 
+#data header
 f.write("Neutron Dose (uSv/hr)\tGamma Dose (uSv/hr)\n")
 
 n = 100
 number_of_frames = 10
-data = []
+gammaData = []
+neutronData=[]
+data=[]
 
-
-
+#draw histogram each time this is called
 def update_hist(num, data):
 
     global f
-    
+
+    #send message to survey meter. 'RR' requests dose
     message="RR\r\n"
     set_ser.write(message.encode('utf-8'))
-    
-    d=set_ser.read(5000)
 
-    #global data
+    #read response
+    d=set_ser.read(5000)
     
     if len(d) == 22:
-    
+
+        #parse response
         neutronDose=float(d[0:6])/100
         gammaDose = float(d[7:13])/100
 
         f.write(str(neutronDose)+"\t"+str(gammaDose)+"\n")
-        
-        if args.gamma:
-            data.append(gammaDose)
-        else:
-            data.append(neutronDose)
+
+        #don't add 0 events to plot. They will be saved to file though.
+        if gammaDose != 0:
+            gammaData.append(gammaDose)
+        if neutronDose != 0:
+            neutronData.append(neutronDose)
 
 
-    global particle
-        
+    #plot the histograms
     plt.cla()
-    plt.hist(data,100)
-    plt.xlabel(particle+"dose ($\mu$Sv/hr)")
+    plt.hist(neutronData,n, alpha=0.5, label='Neutron dose')
+    plt.hist(gammaData  ,n, alpha=0.5, label='$\gamma$ dose');
+    plt.xlabel("dose ($\mu$Sv/hr)")
     plt.ylabel("Counts")
+    plt.legend(loc='upper right')
 
-data.append(0)
 fig = plt.figure()
-hist = plt.hist(0,100)
 
 
 animation = animation.FuncAnimation(fig, update_hist, number_of_frames, fargs=(data, ) )
 
-particle=""
-if args.gamma:
-    particle="$\gamma$ "
-else:
-    particle="Neutron "
-
-
-plt.xlabel(particle+"dose ($\mu$Sv/hr)")
-plt.ylabel("Counts")
 plt.show()
 
 set_ser.close()
