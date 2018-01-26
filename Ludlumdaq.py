@@ -4,9 +4,10 @@ import matplotlib.animation as animation
 
 import serial
 import argparse
+import sys
 
 #get command line arguments
-parser = argparse.ArgumentParser(description='View a single waveform coming from UART')
+parser = argparse.ArgumentParser(description='Read data from a Ludlum Model 2363 survey meter')
 parser.add_argument('-p','--port', help='The port to listen to', default="/dev/ttyUSB0", required=False)
 parser.add_argument('-f','--filename', help='Name of data file', default="ludlum.dat", required=False)
 
@@ -23,6 +24,23 @@ set_ser.bytesize = serial.EIGHTBITS
 set_ser.timeout=0.5
 
 set_ser.open()
+
+message="RH1\r\n"
+set_ser.write(message.encode('utf-8'))
+d=set_ser.read(5000)
+
+header=str(d.decode().strip())
+
+if not header:
+    print("Device not connected. Quiting")
+    sys.exit(0)
+else:
+    print("First device header:")
+    print("   "+header)
+
+
+
+
 
 #open the output filename
 f=open(args.filename, 'w')
