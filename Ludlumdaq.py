@@ -133,7 +133,8 @@ class Index(object):
         print("Closed "+str(f.name))
         f.close()
         f=open(newFile, 'w')
-        
+        f.write("Time (s)\tNeutron Dose (uSv/hr)\tGamma Dose (uSv/hr)\n")
+
         global gammaData;
         global neutronData;
 
