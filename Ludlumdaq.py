@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.widgets import Button
+import time
 
 import serial
 import argparse
@@ -47,7 +48,7 @@ else:
 f=open(args.filename, 'w')
 
 #data header
-f.write("Neutron Dose (uSv/hr)\tGamma Dose (uSv/hr)\n")
+f.write("Time (s)\tNeutron Dose (uSv/hr)\tGamma Dose (uSv/hr)\n")
 
 n = 100
 number_of_frames = 10
@@ -73,7 +74,8 @@ def update_hist(num, data):
         neutronDose=float(d[0:6])/100
         gammaDose = float(d[7:13])/100
 
-        f.write(str(neutronDose)+"\t"+str(gammaDose)+"\n")
+
+        f.write(str(round(time.time(),2))+"\t"+str(neutronDose)+"\t"+str(gammaDose)+"\n")
 
         #don't add 0 events to plot. They will be saved to file though.
         if gammaDose != 0 and gammaDose < 100:
@@ -111,6 +113,7 @@ fig = plt.figure()
 animation = animation.FuncAnimation(fig, update_hist, number_of_frames, fargs=(data, ) )
 
 
+nf=0
 #reset button action
 class Index(object):
     ind=0
@@ -120,15 +123,37 @@ class Index(object):
 
         gammaData=[]
         neutronData=[]
+
+    def save(self, event):
+        global nf
+        global f
+        dotLoc=args.filename.find('.')
+        newFile = args.filename[:dotLoc]+"_"+str(nf)+args.filename[dotLoc:]
+        nf=nf+1
+        print("Closed "+str(f.name))
+        f.close()
+        f=open(newFile, 'w')
+        
+        global gammaData;
+        global neutronData;
+
+        gammaData=[]
+        neutronData=[]
+        
+        
         
 #divide plot into graph and button    
-plt1 = plt.subplot2grid((12, 12), (11, 10), colspan=2) #button
+button1 = plt.subplot2grid((12, 12), (11, 10), colspan=2) #button
+button2 = plt.subplot2grid((12, 12), (11, 8), colspan=2) #button
 plt2 = plt.subplot2grid((7, 7), (0, 0), colspan=7, rowspan=6) #graph
 
 #reset button
 callback=Index()
-breset = Button(plt1, 'Reset')
+breset = Button(button1, 'Reset Plot')
 breset.on_clicked(callback.reset)
+
+bsave = Button(button2, 'Save Data')
+bsave.on_clicked(callback.save)
 
 plt.show()
 
