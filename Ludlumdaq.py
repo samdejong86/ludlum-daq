@@ -160,4 +160,6 @@ plt.show()
 
 
 set_ser.close()
+
+print("Closed "+str(f.name))
 f.close()
