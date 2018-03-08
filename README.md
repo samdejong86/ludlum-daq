@@ -29,6 +29,8 @@ A python script which reads data from a [Ludlum Model 2363 survey meter](http://
 
 ![alt text](img/ludlum.png "Logo Title Text 1")
 
+Two histograms are displayed on this plot: Neutron dose and Gamma dose. These are updated each time the detector is queried. When the dose is 0 or greater than 100, it is not displayed, but it is saved to the output data file.
+
 The Save Data button will save the data recorded to the current file, close it, and open a new one. The first file that is saved is set at the command line by -f FILENAME. After that, new files will be of the form FILENAME_x, where x increments everytime a new file is saved. The display is also reset.
 
 The Reset Plot button clears the histograms
